@@ -1,0 +1,28 @@
+# Web Design Hub — Dependabot-Standardkonfiguration (siehe CLAUDE.md Abschnitt 2f)
+# Ziel-Pfad im Projekt: .github/dependabot.yml
+# Natives GitHub-Feature, kein Drittanbieter-Zugriff auf den Code (AUDIT_LOG.md #31).
+
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      # Patch/Minor-Updates gebündelt, um PR-Flut zu vermeiden — Major-Updates
+      # (potenziell breaking, z. B. React/Three.js-Versionssprünge) bewusst
+      # NICHT gruppiert, damit sie einzeln geprüft werden.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "dependabot"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

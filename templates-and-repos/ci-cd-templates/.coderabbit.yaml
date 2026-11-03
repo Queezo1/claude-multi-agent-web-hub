@@ -1,0 +1,85 @@
+# Web Design Hub Standard-Profil für WebGL/React/Next.js
+# Ziel-Pfad im Projekt: Projekt-Root (muss im Feature-Branch vorhanden sein).
+# Identisch zur Vorlage in skills-and-plugins/CODERABBIT_WORKFLOW.md — dort
+# als Referenzdokumentation mit Erklärungen, hier als einsatzbereite Datei.
+# Feldnamen vor Erst-Einsatz gegen https://docs.coderabbit.ai/reference/configuration
+# gegenprüfen (Schema kann sich weiterentwickeln).
+
+language: "de-DE"
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: true
+  changed_files_summary: true
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+  poem: false
+  enable_prompt_for_ai_agents: true
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+
+  path_instructions:
+    - path: "**/*.glsl"
+      instructions: >
+        Prüfe GLSL-Shader auf unnötige Berechnungen im Fragment-Shader
+        (in den Vertex-Shader oder als Uniform vorverlagern, wo möglich),
+        harte Codierung von Werten, die als Uniform konfigurierbar sein
+        sollten, sowie fehlende Precision-Qualifier.
+
+    - path: "**/hooks/**/*.{ts,tsx}"
+      instructions: >
+        Strikte Prüfung auf WebGL-/Canvas-Memory-Leaks: jeder Hook, der einen
+        WebGL2-Context, ein Three.js-Objekt (Geometry/Material/Texture/
+        RenderTarget) oder einen requestAnimationFrame-Loop erzeugt, MUSS in
+        der useEffect-Cleanup-Funktion dispose()/cancelAnimationFrame()
+        aufrufen. Fehlt die Cleanup-Funktion vollständig, ist das ein
+        Blocker, kein Hinweis. Kein `any` in Uniform-/Prop-Typen.
+
+    - path: "**/scene/**/*.{ts,tsx}"
+      instructions: >
+        Prüfe react-three-fiber-Komponenten auf: DPR-Cap (max. 2, siehe
+        CLAUDE.md Abschnitt 3), unnötige Re-Renders in useFrame (keine
+        Objekt-Allokationen pro Frame), fehlenden prefers-reduced-motion-
+        Fallback, und ob Postprocessing-Passes gebündelt statt einzeln
+        instanziiert werden.
+
+    - path: "**/components/**/*.{ts,tsx}"
+      instructions: >
+        Barrierefreiheit strikt prüfen (jsx-a11y-Niveau): fehlende ARIA-
+        Labels auf interaktiven Elementen, Tastaturbedienbarkeit von
+        Custom-Buttons/Drag-Interaktionen, Farbkontrast-Annahmen im
+        Kommentar dokumentieren. Bei aus 21st.dev übernommenen Komponenten
+        zusätzlich prüfen: wurden Radius/Farbe/Timing projektspezifisch
+        angepasst (siehe 21ST_DEV_INTEGRATION.md) oder 1:1 übernommen?
+
+    - path: "**/*.{test,spec}.{ts,tsx}"
+      instructions: "Kein Review-Fokus auf Stil, nur auf Testabdeckung fehlender Edge-Cases (Reduced-Motion-Pfad, WebGL-nicht-verfügbar-Pfad, a11y-Scan-Abdeckung neuer Routen)."
+
+    - path: "**/*.css"
+      instructions: >
+        Prüfe Web-Font-Einbindungen: KEINE @import/url()-Referenzen auf
+        fonts.googleapis.com oder fonts.gstatic.com (DSGVO-Risiko, siehe
+        CLAUDE.md Abschnitt 3a) — Fonts müssen self-hosted sein.
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/.next/**"
+    - "!**/*.min.js"
+    - "!**/public/vendor/**"
+
+tools:
+  eslint:
+    enabled: true
+  gitleaks:
+    enabled: true
+  semgrep:
+    enabled: true
+  shellcheck:
+    enabled: true
